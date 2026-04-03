@@ -4,28 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/DiplomaThesis.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BaseExplainer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Explainer_time_series.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Explainer_visual_classification.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GradCAM/GradCAM.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GradCAM/GradCAM_test.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/GradCAM_vs_IG_comparison.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/IntegratedGradients/IntegratedGradients.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/IntegratedGradients/IntegratedGradients_test.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Occlusion/Occlusion.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Occlusion/Occlusion_test.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Occlusion/SuperpixelOcclusion.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Occlusion/SuperpixelOcclusion_test.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Pictures/Indian_Cobra.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Pictures/Soldier1.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Pictures/Soldier2.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Pictures/porto-steep-hill.jpg" afterDir="false" />
+    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Explainer_time_series.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Explainer_time_series.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,8 +86,17 @@
       <workItem from="1772799071482" duration="3228000" />
       <workItem from="1773222757405" duration="2773000" />
       <workItem from="1773828441673" duration="12147000" />
-      <workItem from="1773998577159" duration="34403000" />
+      <workItem from="1773998577159" duration="46372000" />
     </task>
+    <task id="LOCAL-00001" summary="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model.">
+      <option name="closed" value="true" />
+      <created>1774364699949</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1774364699949</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -122,5 +112,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model." />
+    <option name="LAST_COMMIT_MESSAGE" value="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model." />
   </component>
 </project>
