@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QFileDialog, QSpinBox, QMessageBox, QSizePolicy
@@ -34,8 +35,10 @@ class MainWindow(QWidget):
         self.context = None
         self.model = None
         self.current_split = "test"
+        self.sample_count = 0
 
         self._build_ui()
+        self._set_workspace_loaded(False)
 
     def _build_ui(self):
         root = QVBoxLayout(self)
@@ -43,6 +46,7 @@ class MainWindow(QWidget):
         # Dataset row
         dataset_row = QHBoxLayout()
         dataset_row.addWidget(QLabel("Dataset:"))
+
         self.dataset_edit = QLineEdit()
         self.dataset_edit.setPlaceholderText("Path to dataset stem or *_vehicles.pcl")
         dataset_row.addWidget(self.dataset_edit)
@@ -56,6 +60,7 @@ class MainWindow(QWidget):
         # Checkpoint row
         checkpoint_row = QHBoxLayout()
         checkpoint_row.addWidget(QLabel("Checkpoint:"))
+
         self.checkpoint_edit = QLineEdit()
         self.checkpoint_edit.setPlaceholderText("Path to .pt checkpoint")
         checkpoint_row.addWidget(self.checkpoint_edit)
@@ -78,6 +83,8 @@ class MainWindow(QWidget):
         self.sample_spin.setMinimum(0)
         self.sample_spin.setMaximum(0)
         self.sample_spin.setValue(0)
+        self.sample_spin.valueChanged.connect(self._on_sample_index_changed)
+        self.sample_spin.editingFinished.connect(self._analyze_current_sample)
         controls_row.addWidget(self.sample_spin)
 
         self.prev_btn = QPushButton("Prev")
@@ -95,6 +102,21 @@ class MainWindow(QWidget):
         controls_row.addStretch()
         root.addLayout(controls_row)
 
+        # Info row
+        info_row = QHBoxLayout()
+
+        self.split_info = QLabel("Split: -")
+        info_row.addWidget(self.split_info)
+
+        self.samples_info = QLabel("Samples: -")
+        info_row.addWidget(self.samples_info)
+
+        self.current_sample_info = QLabel("Current sample: -")
+        info_row.addWidget(self.current_sample_info)
+
+        info_row.addStretch()
+        root.addLayout(info_row)
+
         # Status
         self.status_label = QLabel("Select dataset and checkpoint, then click Load.")
         self.status_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -103,6 +125,21 @@ class MainWindow(QWidget):
         # Canvas
         self.canvas = MplCanvas(self)
         root.addWidget(self.canvas, stretch=1)
+
+    def _set_workspace_loaded(self, loaded: bool):
+        if not loaded:
+            self.sample_spin.setEnabled(False)
+            self.prev_btn.setEnabled(False)
+            self.next_btn.setEnabled(False)
+            self.analyze_btn.setEnabled(False)
+        else:
+            self._update_navigation_buttons()
+
+    def _set_busy(self, busy: bool):
+        if busy:
+            QGuiApplication.setOverrideCursor(Qt.WaitCursor)
+        else:
+            QGuiApplication.restoreOverrideCursor()
 
     def _browse_dataset(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -124,41 +161,82 @@ class MainWindow(QWidget):
         if path:
             self.checkpoint_edit.setText(path)
 
-    def _load_workspace(self):
+    def _validate_paths(self):
         dataset_path = self.dataset_edit.text().strip()
         checkpoint_path = self.checkpoint_edit.text().strip()
 
         if not dataset_path:
-            QMessageBox.warning(self, "Missing dataset", "Please select a dataset path.")
-            return
+            raise ValueError("Please select a dataset path.")
 
         if not checkpoint_path:
-            QMessageBox.warning(self, "Missing checkpoint", "Please select a checkpoint path.")
-            return
+            raise ValueError("Please select a checkpoint path.")
 
+        # Dataset can be either a file or a stem, so validate softly
+        dataset_obj = Path(dataset_path)
+        stem_exists = Path(dataset_path + "_vehicles.pcl").exists()
+        file_exists = dataset_obj.exists()
+
+        if not file_exists and not stem_exists:
+            raise FileNotFoundError(
+                "Dataset path not found. Select either the dataset stem or a real *_vehicles.pcl file."
+            )
+
+        if not Path(checkpoint_path).exists():
+            raise FileNotFoundError("Checkpoint file not found.")
+
+        return dataset_path, checkpoint_path
+
+    def _load_workspace(self):
         try:
+            dataset_path, checkpoint_path = self._validate_paths()
+
+            self._set_busy(True)
             self.status_label.setText("Loading dataset...")
+            self.repaint()
+
             self.context = load_split_context(dataset_path)
 
             self.status_label.setText("Loading checkpoint...")
+            self.repaint()
+
             self.model = build_and_load_model(checkpoint_path)
 
-            test_size = get_dataset_size(self.context, split=self.current_split)
-            if test_size <= 0:
+            self.sample_count = get_dataset_size(self.context, split=self.current_split)
+            if self.sample_count <= 0:
                 raise ValueError(f"No samples available in split '{self.current_split}'.")
 
-            self.sample_spin.setMaximum(test_size - 1)
+            self.sample_spin.setMaximum(self.sample_count - 1)
             self.sample_spin.setValue(0)
 
+            self.split_info.setText(f"Split: {self.current_split}")
+            self.samples_info.setText(f"Samples: {self.sample_count}")
+            self.current_sample_info.setText("Current sample: 0")
+
             self.status_label.setText(
-                f"Loaded. Split={self.current_split}, samples={test_size}, sample_idx=0"
+                f"Workspace loaded. Split={self.current_split}, samples={self.sample_count}. "
+                "Press Analyze to render the current sample."
             )
+
+            self._set_workspace_loaded(True)
+            self._update_navigation_buttons()
 
             self._analyze_current_sample()
 
         except Exception as e:
             QMessageBox.critical(self, "Load failed", str(e))
             self.status_label.setText("Load failed.")
+            self._set_workspace_loaded(False)
+        finally:
+            self._set_busy(False)
+
+    def _show_figure(self, fig):
+        layout = self.layout()
+        layout.removeWidget(self.canvas)
+        self.canvas.deleteLater()
+
+        self.canvas = FigureCanvas(fig)
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        layout.addWidget(self.canvas, stretch=1)
 
     def _analyze_current_sample(self):
         if self.context is None or self.model is None:
@@ -168,7 +246,10 @@ class MainWindow(QWidget):
         sample_idx = self.sample_spin.value()
 
         try:
+            self._set_busy(True)
             self.status_label.setText(f"Analyzing sample {sample_idx}...")
+            self.repaint()
+
             result = run_full_analysis(
                 context=self.context,
                 model=self.model,
@@ -177,32 +258,23 @@ class MainWindow(QWidget):
             )
 
             fig = render_time_series_explanation(result)
-
-            self.canvas.figure.clear()
-
-            # Move axes/artists from returned fig into canvas by replacing figure reference
-            self.canvas.figure = fig
-            self.canvas.setParent(None)
-
-            # Recreate canvas cleanly in layout
-            parent_layout = self.layout()
-            parent_layout.removeWidget(self.canvas)
-            self.canvas.deleteLater()
-
-            self.canvas = FigureCanvas(fig)
-            self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            parent_layout.addWidget(self.canvas, stretch=1)
+            self._show_figure(fig)
 
             true_name = result.class_names[result.true_idx]
             pred_name = result.class_names[result.pred_idx]
 
+            self.current_sample_info.setText(f"Current sample: {sample_idx}")
             self.status_label.setText(
                 f"Sample {sample_idx} | True={true_name} | Pred={pred_name} | Conf={result.confidence:.3f}"
             )
+            self._update_navigation_buttons()
 
         except Exception as e:
             QMessageBox.critical(self, "Analysis failed", str(e))
             self.status_label.setText("Analysis failed.")
+        finally:
+            self._set_busy(False)
+            self._update_navigation_buttons()
 
     def _prev_sample(self):
         value = self.sample_spin.value()
@@ -215,3 +287,17 @@ class MainWindow(QWidget):
         if value < self.sample_spin.maximum():
             self.sample_spin.setValue(value + 1)
             self._analyze_current_sample()
+
+    def _on_sample_index_changed(self, value):
+        self.current_sample_info.setText(f"Current sample: {value}")
+        self._update_navigation_buttons()
+
+    def _update_navigation_buttons(self):
+        loaded = self.context is not None and self.model is not None and self.sample_count > 0
+        current = self.sample_spin.value()
+
+        self.sample_spin.setEnabled(loaded)
+        self.analyze_btn.setEnabled(loaded)
+
+        self.prev_btn.setEnabled(loaded and current > 0)
+        self.next_btn.setEnabled(loaded and current < self.sample_spin.maximum())

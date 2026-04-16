@@ -4,16 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Time series explainer occlussion fixed">
-      <change afterPath="$PROJECT_DIR$/app/bootstrap.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/gui/main_window.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/analysis_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/data_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/model_service.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app_tests.ipynb" afterDir="false" />
+    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Working app MVP">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/gui/main_window.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,7 +88,7 @@
       <workItem from="1773828441673" duration="12147000" />
       <workItem from="1773998577159" duration="48711000" />
       <workItem from="1775294339261" duration="8265000" />
-      <workItem from="1775343518241" duration="58150000" />
+      <workItem from="1775343518241" duration="60951000" />
     </task>
     <task id="LOCAL-00001" summary="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model.">
       <option name="closed" value="true" />
@@ -129,7 +122,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776375204096</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Working app MVP">
+      <option name="closed" value="true" />
+      <created>1776378794559</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1776378794559</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -151,6 +152,7 @@
     <MESSAGE value="Occlusion Sliding Window added to time series experiment" />
     <MESSAGE value="Separate Xmethods tests alligned with the combined ones" />
     <MESSAGE value="Time series explainer occlussion fixed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Time series explainer occlussion fixed" />
+    <MESSAGE value="Working app MVP" />
+    <option name="LAST_COMMIT_MESSAGE" value="Working app MVP" />
   </component>
 </project>
