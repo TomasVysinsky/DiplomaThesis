@@ -29,6 +29,8 @@ class AnalysisResult:
     ig_heatmaps: np.ndarray                # [C, T]
     gradcam_map: np.ndarray                # [T]
 
+    sliding_window_map: np.ndarray | None = None         # [T]
+
 
 def extract_true_label(label):
     if torch.is_tensor(label):
