@@ -7,6 +7,7 @@ from app.services.data_service import get_sample
 from app.services.model_service import predict_sample
 
 from Occlusion.FeatureOcclusion import FeatureOcclusion
+from Occlusion.Occlusion import Occlusion
 from GradCAM.GradCAM import GradCAM1D
 from IntegratedGradients.IntegratedGradients import IntegratedGradients
 
@@ -15,6 +16,7 @@ from IntegratedGradients.IntegratedGradients import IntegratedGradients
 class AnalysisResult:
     sample_idx: int
     split: str
+    mode: str
     feature_names: list[str]
     class_names: list[str]
 
@@ -185,7 +187,6 @@ def prepare_ig_for_display(ig_map, use_abs=True, clip_percentile=98, eps=1e-8):
 
     return out
 
-
 def run_full_analysis(
     context,
     model,
@@ -236,6 +237,7 @@ def run_full_analysis(
     return AnalysisResult(
         sample_idx=sample_idx,
         split=split,
+        mode="combined",
         feature_names=context.feature_names,
         class_names=context.class_names,
         sample=sample,
@@ -247,3 +249,200 @@ def run_full_analysis(
         ig_heatmaps=ig_vis,
         gradcam_map=cam_1d,
     )
+
+
+def _normalize_0_1(x: np.ndarray, eps: float = 1e-8) -> np.ndarray:
+    x = np.asarray(x, dtype=np.float32)
+    xmin = float(x.min())
+    xmax = float(x.max())
+    if xmax - xmin < eps:
+        return np.zeros_like(x)
+    return (x - xmin) / (xmax - xmin)
+
+
+def prepare_heatmap_for_display(x: np.ndarray, clip_percentile: float = 98.0) -> np.ndarray:
+    x = np.asarray(x, dtype=np.float32)
+    out = np.zeros_like(x)
+
+    if x.ndim == 1:
+        hi = float(np.percentile(x, clip_percentile))
+        row = np.clip(x, 0.0, hi)
+        return _normalize_0_1(row)
+
+    for i in range(x.shape[0]):
+        row = x[i]
+        hi = float(np.percentile(row, clip_percentile))
+        row = np.clip(row, 0.0, hi)
+        out[i] = _normalize_0_1(row)
+    return out
+
+def explain_sample_with_window_occlusion(
+    model: nn.Module,
+    sample: torch.Tensor,
+    target_class: int | None = None,
+    window_size: int = 2,
+    stride: int = 1,
+    occlusion_value: str | float = "mean",
+    mode: str = "prob_drop",
+    keep_negative: bool = False,
+    batch_size: int = 32,
+):
+    """
+    Port of WindowOcclusion_time_series.ipynb logic.
+    Requires Occlusion.explain_time_series(...) in your Occlusion class.
+    """
+    model.eval()
+    device = next(model.parameters()).device
+
+    feature_time = sample_to_feature_time(sample).float()   # [C, T]
+    input_tensor = feature_time.unsqueeze(0).to(device)     # [1, C, T]
+
+    explainer = Occlusion(model, device=device)
+
+    occ_map_norm, orig_output, window_drops, window_starts, occ_map_raw = explainer.explain_time_series(
+        input_tensor=input_tensor,
+        target_class=target_class,
+        window_size=window_size,
+        stride=stride,
+        occlusion_value=occlusion_value,
+        mode=mode,
+        batch_size=batch_size,
+        keep_negative=keep_negative,
+    )
+
+    with torch.no_grad():
+        orig_probs = torch.softmax(orig_output, dim=1)
+
+    pred_class = int(torch.argmax(orig_probs, dim=1).item())
+    if target_class is None:
+        target_class = pred_class
+
+    # notebook repeats the call after resolving target_class
+    occ_map_norm, orig_output, window_drops, window_starts, occ_map_raw = explainer.explain_time_series(
+        input_tensor=input_tensor,
+        target_class=target_class,
+        window_size=window_size,
+        stride=stride,
+        occlusion_value=occlusion_value,
+        mode=mode,
+        batch_size=batch_size,
+        keep_negative=keep_negative,
+    )
+
+    dense_scores = occ_map_raw.squeeze(0).detach().cpu().numpy()       # [C, T]
+    dense_scores_norm = prepare_heatmap_for_display(dense_scores, clip_percentile=98.0)
+
+    row_scores = dense_scores.mean(axis=1)                             # [C]
+    global_scores = dense_scores.sum(axis=0)                           # [T]
+
+    window_scores = []
+    starts_np = window_starts.detach().cpu().numpy()
+    drops_np = window_drops.detach().cpu().numpy()                     # [C, n_windows]
+
+    for feat_idx in range(drops_np.shape[0]):
+        for w_idx, start in enumerate(starts_np):
+            end = int(start) + int(window_size)
+            window_scores.append((feat_idx, int(start), end, float(drops_np[feat_idx, w_idx])))
+
+    result = {
+        "feature_time": feature_time.numpy(),
+        "dense_scores": dense_scores,
+        "dense_scores_norm": dense_scores_norm,
+        "row_scores": row_scores,
+        "row_scores_norm": _normalize_0_1(row_scores),
+        "global_scores": global_scores,
+        "global_scores_norm": prepare_heatmap_for_display(global_scores, clip_percentile=98.0),
+        "window_scores": window_scores,
+        "window_starts": starts_np,
+        "window_size": int(window_size),
+        "stride": int(stride),
+        "target_class": int(target_class),
+        "pred_class": pred_class,
+        "confidence": float(orig_probs[0, pred_class].item()),
+        "probs": orig_probs.detach().cpu(),
+        "output": orig_output.detach().cpu(),
+    }
+    return result
+
+def run_window_occlusion_analysis(
+    context,
+    model,
+    sample_idx: int,
+    split: str = "test",
+    window_size: int = 10,
+    stride: int = 1,
+    occlusion_value: str | float = "mean",
+    mode: str = "prob_drop",
+    keep_negative: bool = False,
+    batch_size: int = 1,
+):
+    sample, label = get_sample(context, sample_idx=sample_idx, split=split)
+    true_idx = extract_true_label(label)
+
+    result = explain_sample_with_window_occlusion(
+        model=model,
+        sample=sample,
+        target_class=None,
+        window_size=window_size,
+        stride=stride,
+        occlusion_value=occlusion_value,
+        mode=mode,
+        keep_negative=keep_negative,
+        batch_size=batch_size,
+    )
+
+    return AnalysisResult(
+        sample_idx=sample_idx,
+        split=split,
+        mode="sliding_window",
+        feature_names=context.feature_names,
+        class_names=context.class_names,
+        sample=sample,
+        feature_time=result["feature_time"],
+        true_idx=true_idx,
+        pred_idx=result["pred_class"],
+        confidence=result["confidence"],
+        feature_occlusion_scores=result["row_scores_norm"],   # left blocks now mean row window-occlusion
+        ig_heatmaps=result["dense_scores_norm"],              # main heatmaps now dense sliding-window map
+        gradcam_map=result["global_scores_norm"],             # bottom strip now global overlap/importances
+        sliding_window_map=result["global_scores_norm"],
+    )
+
+def run_analysis(
+    context,
+    model,
+    sample_idx: int,
+    split: str = "test",
+    mode: str = "combined",
+    target_layer=None,
+    ig_steps: int = 50,
+    window_size: int = 10,
+    stride: int = 1,
+):
+    if mode == "combined":
+        result = run_full_analysis(
+            context=context,
+            model=model,
+            sample_idx=sample_idx,
+            split=split,
+            target_layer=target_layer,
+            ig_steps=ig_steps,
+        )
+        result.mode = "combined"
+        return result
+
+    if mode == "sliding_window":
+        return run_window_occlusion_analysis(
+            context=context,
+            model=model,
+            sample_idx=sample_idx,
+            split=split,
+            window_size=window_size,
+            stride=stride,
+            occlusion_value="mean",
+            mode="prob_drop",
+            keep_negative=False,
+            batch_size=1,
+        )
+
+    raise ValueError(f"Unsupported mode: {mode}")

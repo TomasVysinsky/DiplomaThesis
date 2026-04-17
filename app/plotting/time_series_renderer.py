@@ -35,12 +35,14 @@ def compute_grouped_ylims(feature_time, feature_names):
     return ylims
 
 
-def render_time_series_explanation(
+def render_time_series_base(
     result,
     feature_cmap="coolwarm",
     heatmap_cmap="coolwarm",
     global_cmap="coolwarm",
     feature_label="Attribution strength (normalized)",
+    left_label="Feature Occlusion",
+    heatmap_label="Integrated Gradients",
     global_title="GradCAM",
     figsize_per_feature=3.15,
 ):
@@ -65,7 +67,7 @@ def render_time_series_explanation(
     pred_text = class_names[pred_class] if pred_class is not None and pred_class < len(class_names) else pred_class
     true_text = class_names[true_label] if true_label is not None and true_label < len(class_names) else true_label
 
-    n_outer_rows = num_features + 1  # + GradCAM row
+    n_outer_rows = num_features + 1
 
     fig = plt.figure(
         figsize=(16, figsize_per_feature * num_features + 1.2),
@@ -86,6 +88,7 @@ def render_time_series_explanation(
     main_im = None
 
     for i in range(num_features):
+        # feature name
         ax_name = fig.add_subplot(outer[i, 0])
         ax_name.axis("off")
         ax_name.text(
@@ -93,6 +96,7 @@ def render_time_series_explanation(
             ha="right", va="center", fontsize=11
         )
 
+        # left feature score block
         ax_score = fig.add_subplot(outer[i, 1])
         score_img = np.array([[feature_scores[i]]], dtype=np.float32)
         ax_score.imshow(
@@ -108,6 +112,10 @@ def render_time_series_explanation(
         for spine in ax_score.spines.values():
             spine.set_visible(False)
 
+        if i == 0:
+            ax_score.set_title(left_label, fontsize=10, pad=8, fontweight="bold")
+
+        # signal + per-feature heatmap
         sub = outer[i, 2].subgridspec(2, 1, height_ratios=[5.0, 1.2], hspace=0.02)
         ax_ts = fig.add_subplot(sub[0], sharex=prev_ax_ts)
         ax_hm = fig.add_subplot(sub[1], sharex=ax_ts)
@@ -116,7 +124,6 @@ def render_time_series_explanation(
         ax_ts.set_ylim(*ylims[i])
         ax_ts.grid(True, alpha=0.28)
         ax_ts.margins(x=0, y=0.02)
-
         ax_ts.tick_params(axis="x", labelbottom=False)
 
         band_hm = np.repeat(feature_heatmaps[i][None, :], 12, axis=0)
@@ -135,8 +142,17 @@ def render_time_series_explanation(
         for spine in ax_hm.spines.values():
             spine.set_visible(False)
 
+        if i == 0:
+            ax_hm.text(
+                0.0, 1.35, heatmap_label,
+                transform=ax_hm.transAxes,
+                ha="left", va="bottom",
+                fontsize=10, fontweight="bold"
+            )
+
         prev_ax_ts = ax_ts
 
+    # global strip
     row = num_features
 
     ax_global_name = fig.add_subplot(outer[row, 0:2])
@@ -163,6 +179,7 @@ def render_time_series_explanation(
     for spine in ax_global.spines.values():
         spine.set_visible(False)
 
+    # colorbar
     cbar_ax = fig.add_subplot(outer[:num_features, 3])
     cbar = fig.colorbar(main_im, cax=cbar_ax)
     cbar.set_label(feature_label)
@@ -177,3 +194,35 @@ def render_time_series_explanation(
 
     fig.suptitle(" | ".join(title_parts), fontsize=13)
     return fig
+
+
+def render_combined_explanation(result):
+    return render_time_series_base(
+        result,
+        left_label="Feature Occlusion",
+        heatmap_label="Integrated Gradients",
+        global_title="GradCAM",
+        feature_label="Attribution strength (normalized)",
+    )
+
+
+def render_sliding_window_explanation(result):
+    return render_time_series_base(
+        result,
+        left_label="Mean window occlusion",
+        heatmap_label="Sliding Window Occlusion",
+        global_title="Window overlap",
+        feature_label="Attribution strength (normalized)",
+    )
+
+
+def render_analysis_result(result):
+    mode = getattr(result, "mode", "combined")
+
+    if mode == "combined":
+        return render_combined_explanation(result)
+
+    if mode == "sliding_window":
+        return render_sliding_window_explanation(result)
+
+    raise ValueError(f"Unsupported result.mode: {mode}")

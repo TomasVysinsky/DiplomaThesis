@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Improved UX details">
-      <change afterPath="$PROJECT_DIR$/WindowOcclusion_time_series_Superpixel.ipynb" afterDir="false" />
+    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Window occlusion in time series migrated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Occlusion/Occlusion.py" beforeDir="false" afterPath="$PROJECT_DIR$/Occlusion/Occlusion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WindowOcclusion_time_series.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/WindowOcclusion_time_series.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/analysis_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/analysis_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -92,7 +91,7 @@
       <workItem from="1773998577159" duration="48711000" />
       <workItem from="1775294339261" duration="8265000" />
       <workItem from="1775343518241" duration="61696000" />
-      <workItem from="1776408612036" duration="7512000" />
+      <workItem from="1776408612036" duration="17389000" />
     </task>
     <task id="LOCAL-00001" summary="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model.">
       <option name="closed" value="true" />
@@ -142,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776382121309</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Window occlusion in time series migrated">
+      <option name="closed" value="true" />
+      <created>1776418073356</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1776418073356</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -166,6 +173,7 @@
     <MESSAGE value="Time series explainer occlussion fixed" />
     <MESSAGE value="Working app MVP" />
     <MESSAGE value="Improved UX details" />
-    <option name="LAST_COMMIT_MESSAGE" value="Improved UX details" />
+    <MESSAGE value="Window occlusion in time series migrated" />
+    <option name="LAST_COMMIT_MESSAGE" value="Window occlusion in time series migrated" />
   </component>
 </project>

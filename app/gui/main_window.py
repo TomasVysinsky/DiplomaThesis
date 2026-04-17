@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-    QFileDialog, QSpinBox, QMessageBox, QSizePolicy
+    QFileDialog, QSpinBox, QMessageBox, QSizePolicy, QComboBox
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -12,8 +12,8 @@ from matplotlib.figure import Figure
 
 from app.services.data_service import load_split_context, get_dataset_size
 from app.services.model_service import build_and_load_model
-from app.services.analysis_service import run_full_analysis
-from app.plotting.time_series_renderer import render_time_series_explanation
+from app.services.analysis_service import run_analysis
+from app.plotting.time_series_renderer import render_analysis_result
 
 
 class MplCanvas(FigureCanvas):
@@ -113,6 +113,15 @@ class MainWindow(QWidget):
 
         self.current_sample_info = QLabel("Current sample: -")
         info_row.addWidget(self.current_sample_info)
+
+        controls_row.addWidget(QLabel("View:"))
+        self.view_mode_combo = QComboBox()
+        self.view_mode_combo.addItems([
+            "Combined explainer",
+            "Sliding Window Occlusion",
+        ])
+        self.view_mode_combo.currentIndexChanged.connect(self._on_view_mode_changed)
+        controls_row.addWidget(self.view_mode_combo)
 
         info_row.addStretch()
         root.addLayout(info_row)
@@ -249,15 +258,17 @@ class MainWindow(QWidget):
             self._set_busy(True)
             self.status_label.setText(f"Analyzing sample {sample_idx}...")
             self.repaint()
+            mode = self._current_view_mode()
 
-            result = run_full_analysis(
+            result = run_analysis(
                 context=self.context,
                 model=self.model,
                 sample_idx=sample_idx,
                 split=self.current_split,
+                mode=mode,
             )
 
-            fig = render_time_series_explanation(result)
+            fig = render_analysis_result(result)
             self._show_figure(fig)
 
             true_name = result.class_names[result.true_idx]
@@ -301,3 +312,16 @@ class MainWindow(QWidget):
 
         self.prev_btn.setEnabled(loaded and current > 0)
         self.next_btn.setEnabled(loaded and current < self.sample_spin.maximum())
+
+    def _current_view_mode(self):
+        text = self.view_mode_combo.currentText()
+        if text == "Combined explainer":
+            return "combined"
+        if text == "Sliding Window Occlusion":
+            return "sliding_window"
+        return "combined"
+
+    def _on_view_mode_changed(self, _index):
+        if self.context is None or self.model is None:
+            return
+        self._analyze_current_sample()
