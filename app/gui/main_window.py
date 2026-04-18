@@ -4,13 +4,14 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-    QFileDialog, QSpinBox, QMessageBox, QSizePolicy, QComboBox
+    QFileDialog, QSpinBox, QMessageBox, QSizePolicy, QComboBox,
+    QTableWidget, QTableWidgetItem, QHeaderView
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from app.services.data_service import load_split_context, get_dataset_size
+from app.services.data_service import load_split_context, get_dataset_size, build_window_rows
 from app.services.model_service import build_and_load_model
 from app.services.analysis_service import run_analysis
 from app.plotting.time_series_renderer import render_analysis_result
@@ -39,6 +40,8 @@ class MainWindow(QWidget):
 
         self._build_ui()
         self._set_workspace_loaded(False)
+
+        self.window_rows = []
 
     def _build_ui(self):
         root = QVBoxLayout(self)
@@ -131,9 +134,55 @@ class MainWindow(QWidget):
         self.status_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         root.addWidget(self.status_label)
 
-        # Canvas
+        # Main content area: plot on the left, window table on the right
+        self.content_row = QHBoxLayout()
+
+        # Canvas (left)
         self.canvas = MplCanvas(self)
-        root.addWidget(self.canvas, stretch=1)
+        self.content_row.addWidget(self.canvas, stretch=4)
+
+        # Window table (right)
+        self.window_table = QTableWidget()
+        self.window_table.setColumnCount(5)
+        self.window_table.setHorizontalHeaderLabels([
+            "Sample idx", "Vehicle", "Start time", "End time", "True"
+        ])
+        self.window_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.window_table.setSelectionMode(QTableWidget.SingleSelection)
+        self.window_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.window_table.verticalHeader().setVisible(False)
+        self.window_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.window_table.horizontalHeader().setStretchLastSection(True)
+        self.window_table.cellDoubleClicked.connect(self._on_window_table_double_clicked)
+
+        # optional: fixed/min width so it behaves like a side panel
+        self.window_table.setMinimumWidth(430)
+        self.window_table.setMaximumWidth(650)
+
+        self.content_row.addWidget(self.window_table, stretch=2)
+
+        root.addLayout(self.content_row, stretch=1)
+
+        # # Window table
+        # self.window_table = QTableWidget()
+        # self.window_table.setColumnCount(5)
+        # self.window_table.setHorizontalHeaderLabels([
+        #     "Sample idx", "Vehicle", "Start time", "End time", "True"
+        # ])
+        # self.window_table.setSelectionBehavior(QTableWidget.SelectRows)
+        # self.window_table.setSelectionMode(QTableWidget.SingleSelection)
+        # self.window_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        # self.window_table.verticalHeader().setVisible(False)
+        # self.window_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        # self.window_table.horizontalHeader().setStretchLastSection(True)
+        # self.window_table.setMaximumHeight(220)
+        # self.window_table.cellDoubleClicked.connect(self._on_window_table_double_clicked)
+        #
+        # root.addWidget(self.window_table)
+        #
+        # # Canvas
+        # self.canvas = MplCanvas(self)
+        # root.addWidget(self.canvas, stretch=1)
 
     def _set_workspace_loaded(self, loaded: bool):
         if not loaded:
@@ -229,6 +278,8 @@ class MainWindow(QWidget):
             self._set_workspace_loaded(True)
             self._update_navigation_buttons()
 
+            self._populate_window_table()
+
             self._analyze_current_sample()
 
         except Exception as e:
@@ -239,13 +290,14 @@ class MainWindow(QWidget):
             self._set_busy(False)
 
     def _show_figure(self, fig):
-        layout = self.layout()
-        layout.removeWidget(self.canvas)
+        self.content_row.removeWidget(self.canvas)
         self.canvas.deleteLater()
 
         self.canvas = FigureCanvas(fig)
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        layout.addWidget(self.canvas, stretch=1)
+
+        # vlož späť na ľavú stranu content_row
+        self.content_row.insertWidget(0, self.canvas, stretch=4)
 
     def _analyze_current_sample(self):
         if self.context is None or self.model is None:
@@ -279,6 +331,9 @@ class MainWindow(QWidget):
                 f"Sample {sample_idx} | True={true_name} | Pred={pred_name} | Conf={result.confidence:.3f}"
             )
             self._update_navigation_buttons()
+
+            if 0 <= sample_idx < self.window_table.rowCount():
+                self.window_table.selectRow(sample_idx)
 
         except Exception as e:
             QMessageBox.critical(self, "Analysis failed", str(e))
@@ -325,3 +380,30 @@ class MainWindow(QWidget):
         if self.context is None or self.model is None:
             return
         self._analyze_current_sample()
+
+    def _on_window_table_double_clicked(self, row, _column):
+        if row < 0 or row >= len(self.window_rows):
+            return
+
+        sample_idx = self.window_rows[row].sample_idx
+        self.sample_spin.setValue(sample_idx)
+        self._analyze_current_sample()
+
+    def _populate_window_table(self):
+        if self.context is None:
+            self.window_table.setRowCount(0)
+            self.window_rows = []
+            return
+
+        self.window_rows = build_window_rows(self.context, split=self.current_split)
+        self.window_table.setRowCount(len(self.window_rows))
+
+        for row_idx, row in enumerate(self.window_rows):
+            self.window_table.setItem(row_idx, 0, QTableWidgetItem(str(row.sample_idx)))
+            self.window_table.setItem(row_idx, 1, QTableWidgetItem(row.vehicle))
+            self.window_table.setItem(row_idx, 2, QTableWidgetItem(row.start_time))
+            self.window_table.setItem(row_idx, 3, QTableWidgetItem(row.end_time))
+            self.window_table.setItem(row_idx, 4, QTableWidgetItem(row.true_label))
+
+        if self.window_rows:
+            self.window_table.selectRow(0)

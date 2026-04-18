@@ -30,6 +30,15 @@ class SplitDataContext:
     class_names: List[str]
     split_commands: List[TestVehicleSplitComand]
 
+@dataclass
+class WindowRow:
+    sample_idx: int
+    vehicle: str
+    start_time: str
+    end_time: str
+    true_idx: int
+    true_label: str
+
 
 def resolve_dataset_stem(dataset_path: str) -> str:
     """
@@ -155,3 +164,33 @@ def get_sample(
 
     sample, label = dataset[sample_idx]
     return sample, label
+
+def build_window_rows(context: SplitDataContext, split: str = "test") -> list[WindowRow]:
+    dataset = get_dataset(context, split=split)
+    class_names = context.class_names
+
+    rows: list[WindowRow] = []
+    sample_idx = 0
+
+    # windows_by_vehicle preserves the structure we want for UI
+    for vehicle_ecv, windows in dataset.windows_by_vehicle.items():
+        for window in windows:
+            true_idx = int(window.result_class)
+            true_label = class_names[true_idx] if 0 <= true_idx < len(class_names) else str(true_idx)
+
+            start_time = window.start_time().strftime("%Y-%m-%d %H:%M:%S")
+            end_time = window.end_time().strftime("%Y-%m-%d %H:%M:%S")
+
+            rows.append(
+                WindowRow(
+                    sample_idx=sample_idx,
+                    vehicle=vehicle_ecv,
+                    start_time=start_time,
+                    end_time=end_time,
+                    true_idx=true_idx,
+                    true_label=true_label,
+                )
+            )
+            sample_idx += 1
+
+    return rows

@@ -113,7 +113,12 @@ def render_time_series_base(
             spine.set_visible(False)
 
         if i == 0:
-            ax_score.set_title(left_label, fontsize=10, pad=8, fontweight="bold")
+            ax_name.text(
+                0.98, 1.10, left_label,
+                transform=ax_name.transAxes,
+                ha="right", va="bottom",
+                fontsize=10, fontweight="bold"
+            )
 
         # signal + per-feature heatmap
         sub = outer[i, 2].subgridspec(2, 1, height_ratios=[5.0, 1.2], hspace=0.02)

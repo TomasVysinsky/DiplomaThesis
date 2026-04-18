@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Window occlusion in time series migrated">
+    <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Window occlusion in app integrated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/gui/main_window.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/analysis_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/analysis_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/data_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/data_service.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,21 +35,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tvysi/PycharmProjects/GradCamIntegration/Results&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.jupyter.core.jupyter.connections.configuration.JupyterServerConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/tvysi/PycharmProjects/Výsyp smetí xAI",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.intellij.jupyter.core.jupyter.connections.configuration.JupyterServerConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tvysi\PycharmProjects\GradCamIntegration" />
@@ -91,7 +91,8 @@
       <workItem from="1773998577159" duration="48711000" />
       <workItem from="1775294339261" duration="8265000" />
       <workItem from="1775343518241" duration="61696000" />
-      <workItem from="1776408612036" duration="17389000" />
+      <workItem from="1776408612036" duration="28226000" />
+      <workItem from="1776506092594" duration="431000" />
     </task>
     <task id="LOCAL-00001" summary="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model.">
       <option name="closed" value="true" />
@@ -149,7 +150,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776418073356</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Window occlusion in app integrated">
+      <option name="closed" value="true" />
+      <created>1776452188215</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1776452188215</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -174,6 +183,7 @@
     <MESSAGE value="Working app MVP" />
     <MESSAGE value="Improved UX details" />
     <MESSAGE value="Window occlusion in time series migrated" />
-    <option name="LAST_COMMIT_MESSAGE" value="Window occlusion in time series migrated" />
+    <MESSAGE value="Window occlusion in app integrated" />
+    <option name="LAST_COMMIT_MESSAGE" value="Window occlusion in app integrated" />
   </component>
 </project>
