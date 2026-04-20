@@ -159,6 +159,18 @@ def run_ig_sample(model, sample, target_class=None, baseline=None, steps=50):
     return ig_2d, pred_class, confidence, output
 
 
+def _clip_and_normalize_global(
+    x: np.ndarray,
+    clip_percentile: float = 98.0,
+    eps: float = 1e-8,
+    lo: float = 0.0,
+) -> np.ndarray:
+    x = np.asarray(x, dtype=np.float32)
+    hi = float(np.percentile(x, clip_percentile))
+    x = np.clip(x, lo, hi)
+    return _normalize_0_1(x, eps=eps)
+
+
 def prepare_ig_for_display(ig_map, use_abs=True, clip_percentile=98, eps=1e-8):
     ig_map = np.asarray(ig_map, dtype=np.float32)
 
@@ -167,25 +179,12 @@ def prepare_ig_for_display(ig_map, use_abs=True, clip_percentile=98, eps=1e-8):
     else:
         vis = ig_map.copy()
 
-    out = np.zeros_like(vis)
-
-    for i in range(vis.shape[0]):
-        row = vis[i]
-
-        hi = np.percentile(row, clip_percentile)
-        lo = 0.0
-
-        row = np.clip(row, lo, hi)
-
-        rmin = float(row.min())
-        rmax = float(row.max())
-
-        if rmax - rmin < eps:
-            out[i] = 0.0
-        else:
-            out[i] = (row - rmin) / (rmax - rmin)
-
-    return out
+    return _clip_and_normalize_global(
+        vis,
+        clip_percentile=clip_percentile,
+        eps=eps,
+        lo=0.0,
+    )
 
 def run_full_analysis(
     context,
@@ -262,19 +261,7 @@ def _normalize_0_1(x: np.ndarray, eps: float = 1e-8) -> np.ndarray:
 
 def prepare_heatmap_for_display(x: np.ndarray, clip_percentile: float = 98.0) -> np.ndarray:
     x = np.asarray(x, dtype=np.float32)
-    out = np.zeros_like(x)
-
-    if x.ndim == 1:
-        hi = float(np.percentile(x, clip_percentile))
-        row = np.clip(x, 0.0, hi)
-        return _normalize_0_1(row)
-
-    for i in range(x.shape[0]):
-        row = x[i]
-        hi = float(np.percentile(row, clip_percentile))
-        row = np.clip(row, 0.0, hi)
-        out[i] = _normalize_0_1(row)
-    return out
+    return _clip_and_normalize_global(x, clip_percentile=clip_percentile, lo=0.0)
 
 def explain_sample_with_window_occlusion(
     model: nn.Module,
