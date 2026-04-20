@@ -5,7 +5,7 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QFileDialog, QSpinBox, QMessageBox, QSizePolicy, QComboBox,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView, QSplitter
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -135,11 +135,14 @@ class MainWindow(QWidget):
         root.addWidget(self.status_label)
 
         # Main content area: plot on the left, window table on the right
-        self.content_row = QHBoxLayout()
+        # Use QSplitter so the user can resize both panes horizontally.
+        self.content_splitter = QSplitter(Qt.Horizontal)
+        self.content_splitter.setChildrenCollapsible(False)
+        self.content_splitter.setHandleWidth(8)
 
         # Canvas (left)
         self.canvas = MplCanvas(self)
-        self.content_row.addWidget(self.canvas, stretch=4)
+        self.content_splitter.addWidget(self.canvas)
 
         # Window table (right)
         self.window_table = QTableWidget()
@@ -159,9 +162,12 @@ class MainWindow(QWidget):
         self.window_table.setMinimumWidth(430)
         self.window_table.setMaximumWidth(650)
 
-        self.content_row.addWidget(self.window_table, stretch=2)
+        self.content_splitter.addWidget(self.window_table)
+        self.content_splitter.setStretchFactor(0, 4)
+        self.content_splitter.setStretchFactor(1, 2)
+        self.content_splitter.setSizes([950, 450])
 
-        root.addLayout(self.content_row, stretch=1)
+        root.addWidget(self.content_splitter, stretch=1)
 
         # # Window table
         # self.window_table = QTableWidget()
@@ -290,14 +296,18 @@ class MainWindow(QWidget):
             self._set_busy(False)
 
     def _show_figure(self, fig):
-        self.content_row.removeWidget(self.canvas)
+        current_sizes = self.content_splitter.sizes()
+
+        self.canvas.setParent(None)
         self.canvas.deleteLater()
 
         self.canvas = FigureCanvas(fig)
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        # vlož späť na ľavú stranu content_row
-        self.content_row.insertWidget(0, self.canvas, stretch=4)
+        self.content_splitter.insertWidget(0, self.canvas)
+
+        if current_sizes and len(current_sizes) == 2:
+            self.content_splitter.setSizes(current_sizes)
 
     def _analyze_current_sample(self):
         if self.context is None or self.model is None:
