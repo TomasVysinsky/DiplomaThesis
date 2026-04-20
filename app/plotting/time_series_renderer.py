@@ -87,10 +87,10 @@ def _render_single_panel(
     panel = spec.subgridspec(
         nrows=n_features + 1,
         ncols=4,
-        width_ratios=[3.0, 1.0, 18.0, 0.9],
+        width_ratios=[1.8, 0.55, 23.0, 0.8],
         height_ratios=[1.0] * n_features + [0.7],
         hspace=0.18,
-        wspace=0.08,
+        wspace=0.035,
     )
 
     ylims = compute_grouped_ylims(feature_time[feature_indices], [feature_names[i] for i in feature_indices])

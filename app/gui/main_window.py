@@ -5,7 +5,8 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QFileDialog, QSpinBox, QMessageBox, QSizePolicy, QComboBox,
-    QTableWidget, QTableWidgetItem, QHeaderView, QSplitter
+    QTableWidget, QTableWidgetItem, QHeaderView, QSplitter,
+    QGroupBox, QTextBrowser
 )
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -144,7 +145,12 @@ class MainWindow(QWidget):
         self.canvas = MplCanvas(self)
         self.content_splitter.addWidget(self.canvas)
 
-        # Window table (right)
+        # Right side panel: navigation table on top, explainer description below
+        self.side_panel = QWidget()
+        self.side_panel_layout = QVBoxLayout(self.side_panel)
+        self.side_panel_layout.setContentsMargins(0, 0, 0, 0)
+        self.side_panel_layout.setSpacing(10)
+
         self.window_table = QTableWidget()
         self.window_table.setColumnCount(5)
         self.window_table.setHorizontalHeaderLabels([
@@ -157,12 +163,48 @@ class MainWindow(QWidget):
         self.window_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.window_table.horizontalHeader().setStretchLastSection(True)
         self.window_table.cellDoubleClicked.connect(self._on_window_table_double_clicked)
+        self.side_panel_layout.addWidget(self.window_table, stretch=3)
+
+        self.methods_group = QGroupBox("O použitých metódach")
+        methods_layout = QVBoxLayout(self.methods_group)
+
+        self.methods_description = QTextBrowser()
+        self.methods_description.setReadOnly(True)
+        self.methods_description.setOpenExternalLinks(False)
+        self.methods_description.setHtml(
+            """
+            <p>
+                Tieto vizualizácie ukazujú, <b>ktoré časti vstupu boli pre model dôležité</b>
+                pri jeho rozhodovaní. Výraznejšie zvýraznenie znamená väčší vplyv na výsledok.
+            </p>
+            <p><b>Feature Occlusion</b><br>
+                Sleduje, ako sa zmení výsledok, keď sa skryje celý vstupný signál.
+                Ak sa predikcia výrazne zhorší, daný signál bol dôležitý.
+            </p>
+            <p><b>Integrated Gradients</b><br>
+                Ukazuje, ktoré konkrétne časti signálu najviac prispeli k výsledku modelu.
+            </p>
+            <p><b>Grad-CAM</b><br>
+                Zvýrazňuje časové úseky, na ktoré sa model pri rozhodovaní najviac sústredil.
+            </p>
+            <p><b>Sliding Window Occlusion</b><br>
+                Postupne zakrýva krátke úseky signálu a sleduje, ktoré z nich najviac ovplyvnia výsledok.
+            </p>
+            <p><b>Poznámka:</b><br>
+                Tieto metódy nevysvetľujú, čo je objektívne správne, ale to,
+                <b>čo bolo dôležité pre samotný model</b>.
+            </p>
+            """
+        )
+        methods_layout.addWidget(self.methods_description)
+
+        self.side_panel_layout.addWidget(self.methods_group, stretch=2)
 
         # optional: fixed/min width so it behaves like a side panel
-        self.window_table.setMinimumWidth(430)
-        self.window_table.setMaximumWidth(650)
+        self.side_panel.setMinimumWidth(430)
+        self.side_panel.setMaximumWidth(650)
 
-        self.content_splitter.addWidget(self.window_table)
+        self.content_splitter.addWidget(self.side_panel)
         self.content_splitter.setStretchFactor(0, 4)
         self.content_splitter.setStretchFactor(1, 2)
         self.content_splitter.setSizes([950, 450])
