@@ -6,6 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="d4b29145-9381-4845-a5a6-f10bdd814ab8" name="Changes" comment="Window occlusion in app integrated">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Explainer_visual_classification.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Explainer_visual_classification.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Explainer_visual_detection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Explainer_visual_detection.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/gui/main_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/gui/main_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/plotting/time_series_renderer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +27,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "TomasVysinsky"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/TomasVysinsky/DiplomaThesis.git",
+    "accountId": "44a04c85-bb90-4e7e-abfd-e87945d5eef7"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -32,21 +48,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tvysi/PycharmProjects/Výsyp smetí xAI&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.jupyter.core.jupyter.connections.configuration.JupyterServerConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "C:/Users/tvysi/PycharmProjects/GradCamIntegration/Results/visual_detection_cows2.png",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.intellij.jupyter.core.jupyter.connections.configuration.JupyterServerConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\tvysi\PycharmProjects\GradCamIntegration" />
@@ -90,6 +106,7 @@
       <workItem from="1775343518241" duration="61696000" />
       <workItem from="1776408612036" duration="28226000" />
       <workItem from="1776506092594" duration="431000" />
+      <workItem from="1776857088696" duration="22786000" />
     </task>
     <task id="LOCAL-00001" summary="GradCAM, IG and Superpixel Occlusion implemented on visual classification models and on time series model.">
       <option name="closed" value="true" />

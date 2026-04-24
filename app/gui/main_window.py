@@ -182,13 +182,19 @@ class MainWindow(QWidget):
                 Ak sa predikcia výrazne zhorší, daný signál bol dôležitý.
             </p>
             <p><b>Integrated Gradients</b><br>
-                Ukazuje, ktoré konkrétne časti signálu najviac prispeli k výsledku modelu.
+                Ukazuje, ktoré konkrétne časti daného signálu najviac prispeli k výsledku modelu.
             </p>
             <p><b>Grad-CAM</b><br>
-                Zvýrazňuje časové úseky, na ktoré sa model pri rozhodovaní najviac sústredil.
+                Zvýrazňuje časové úseky naprieč signálmi, na ktoré sa model pri rozhodovaní najviac sústredil.
             </p>
             <p><b>Sliding Window Occlusion</b><br>
                 Postupne zakrýva krátke úseky signálu a sleduje, ktoré z nich najviac ovplyvnia výsledok.
+            </p>
+            <p><b>Mean Window Occlusion</b><br>
+                Predstavuje priemerný výsledok Sliding Window Occlusion pre daný signál.
+            </p>
+            <p><b>Window Overlap</b><br>
+                Postupne zakrýva rovnaký časový úsek vo všetkých signáloch naraz a sleduje, ako to ovplyvní výsledok modelu.
             </p>
             <p><b>Poznámka:</b><br>
                 Tieto metódy nevysvetľujú, čo je objektívne správne, ale to,
