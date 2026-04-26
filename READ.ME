@@ -1,0 +1,13 @@
+Pokyny na spustenie:
+- v hlavnom priečinku vytvoriť test enviroment a aktivovať ho:
+    py -3.11 -m venv xai_gpu_env
+    xai_gpu_env\Scripts\Activate.ps1
+
+- nainštalovať torch pre cudu:
+    python -m pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+
+- nainštalovať requirements:
+    pip install -r requirements.txt
+
+- spustiť appku:
+    python -m app.main

@@ -217,27 +217,6 @@ class MainWindow(QWidget):
 
         root.addWidget(self.content_splitter, stretch=1)
 
-        # # Window table
-        # self.window_table = QTableWidget()
-        # self.window_table.setColumnCount(5)
-        # self.window_table.setHorizontalHeaderLabels([
-        #     "Sample idx", "Vehicle", "Start time", "End time", "True"
-        # ])
-        # self.window_table.setSelectionBehavior(QTableWidget.SelectRows)
-        # self.window_table.setSelectionMode(QTableWidget.SingleSelection)
-        # self.window_table.setEditTriggers(QTableWidget.NoEditTriggers)
-        # self.window_table.verticalHeader().setVisible(False)
-        # self.window_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        # self.window_table.horizontalHeader().setStretchLastSection(True)
-        # self.window_table.setMaximumHeight(220)
-        # self.window_table.cellDoubleClicked.connect(self._on_window_table_double_clicked)
-        #
-        # root.addWidget(self.window_table)
-        #
-        # # Canvas
-        # self.canvas = MplCanvas(self)
-        # root.addWidget(self.canvas, stretch=1)
-
     def _set_workspace_loaded(self, loaded: bool):
         if not loaded:
             self.sample_spin.setEnabled(False)
